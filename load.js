@@ -57,7 +57,8 @@ function log(/* format, values... */) {
 }
 
 avatar.on('error', function onError(error) {
-  log('error: %s', util.inspect(error, { showHidden: true, depth: null }))
+  log('error: %s %s %s', error.transactionid, transactions[error.transactionid],
+      util.inspect(error, { showHidden: true, depth: null }))
   stats.errors.count++;
   delete transactions[error.transactionid]
   startUpload()

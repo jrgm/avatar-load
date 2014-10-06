@@ -21,9 +21,11 @@ Avatar.prototype.setVerbose = function Avatar_setVerbose(verbose) {
 }
 
 Avatar.prototype.upload = function Avatar_upload(options) {
+  var transactionid = options.transactionid || 'no-transaction-id'
   if (this.verbose) {
-    log('start:upload      -> %s', options.host)
+    log('start:upload      -> %s %s', transactionid, options.host)
   }
+
   var requestArgs = {
     headers: {
       'Content-Type': 'image/png',
@@ -34,7 +36,7 @@ Avatar.prototype.upload = function Avatar_upload(options) {
     body: options.image || this.options.image,
     maxSockets: Infinity,
  }
-  var transactionid = options.transactionid || 'no-transaction-id'
+
   var startTime = Date.now()
   var self = this
 
