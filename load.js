@@ -1,5 +1,9 @@
 #!/usr/bin/env node
 
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 var util = require('util')
 var crypto = require('crypto')
 var options = require('commander')
@@ -59,7 +63,7 @@ function log(/* format, values... */) {
 avatar.on('error', function onError(error) {
   log('error: %s %s %s', error.transactionid, transactions[error.transactionid],
       util.inspect(error, { showHidden: true, depth: null }))
-  stats.errors.count++;
+  stats.errors.count++
   delete transactions[error.transactionid]
   startUpload()
 })
@@ -102,7 +106,7 @@ function startUpload() {
 }
 
 function intParse(string, defvalue) {
-  var intvalue = parseInt(string, 10);
+  var intvalue = parseInt(string, 10)
   if (typeof intvalue === 'number') return intvalue
   return defvalue
 }
@@ -116,7 +120,7 @@ function intParse(string, defvalue) {
     .option('-p, --profile <server>', 'Hostname of profile server (default profile.stage.mozaws.net)',
             'profile.stage.mozaws.net')
     .option('-v, --verbose', 'show detailed logs for every upload/download')
-    .parse(process.argv);
+    .parse(process.argv)
 
   if (!options.bearer) {
     log('Missing option "--bearer". Required option!')
