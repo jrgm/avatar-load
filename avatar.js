@@ -12,32 +12,43 @@ var request = require('request')
 function Avatar(options) {
   events.EventEmitter.call(this)
   request.defaults({ strictSSL: true })
-  this.options = options || {}
-  if (!this.options.image) {
-    var imagePath = path.resolve(__dirname, 'cat.png')
-    this.options.image = fs.readFileSync(imagePath)
-  }
+  options = options || {}
+
+  this.verbose = options.verbose
+
+  if (!options.bearer) throw new Error('option "bearer" is required')
+  this.bearer = options.bearer
+
+  if (!options.host) throw new Error('option "host" is required')
+  this.host = options.host
+  
+  this.image = options.image ||
+    fs.readFileSync(path.resolve(__dirname, 'cat.png'))
 }
 util.inherits(Avatar, events.EventEmitter)
 
-Avatar.prototype.setVerbose = function Avatar_setVerbose(verbose) {
-  this.verbose = verbose
+Avatar.prototype.log = function Avatar_log(/* format, values... */) {
+  if (!this.verbose) return
+
+  var args = Array.prototype.slice.call(arguments)
+  var timestamp = new Date().toISOString()
+  args[0] = util.format('[%s] %s', timestamp, args[0])
+
+  process.stderr.write(util.format.apply(null, args.concat('\n')))
 }
 
 Avatar.prototype.upload = function Avatar_upload(options) {
   var transactionid = options.transactionid || 'no-transaction-id'
-  if (this.verbose) {
-    log('start:upload      -> %s %s', transactionid, options.host)
-  }
+  this.log('start:upload      -> %s %s', transactionid, this.host)
 
   var requestArgs = {
     headers: {
       'Content-Type': 'image/png',
-      'Authorization': 'Bearer ' + options.bearer,
-      'Content-Length': this.options.image.length
+      'Authorization': 'Bearer ' + this.bearer,
+      'Content-Length': this.image.length
     },
-    uri: 'https://' + options.host + '/v1/avatar/upload',
-    body: options.image || this.options.image,
+    uri: 'https://' + this.host + '/v1/avatar/upload',
+    body: this.image,
     maxSockets: Infinity,
  }
 
@@ -78,9 +89,7 @@ Avatar.prototype.download = function Avatar_download(options) {
   var startTime = Date.now()
   var self = this
 
-  if (this.verbose) {
-    log('start:download    -> %s', options.url)
-  }
+  this.log('start:download    -> %s', options.url)
 
   var requestArgs = { 
     encoding: null, // `encoding: null` will return body as a `Buffer`
@@ -124,7 +133,6 @@ Avatar.prototype.download = function Avatar_download(options) {
   })
 }
 
-
 function jsonParse(content) {
   try {
     return JSON.parse(content)
@@ -149,12 +157,4 @@ function isValidPng(image, cb) {
   })
 }
 
-function log(/* format, values... */) {
-  var args = Array.prototype.slice.call(arguments)
-  var timestamp = new Date().toISOString()
-  args[0] = util.format('[%s] %s', timestamp, args[0])
-  process.stderr.write(util.format.apply(null, args.concat('\n')))
-}
-
 module.exports = Avatar
-
